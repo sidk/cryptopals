@@ -1,0 +1,24 @@
+{
+  "name": "cryptopals",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src/ -d lib/",
+    "flow": "flow",
+    "test": "jest"
+  },
+  "author": "sidk",
+  "license": "MIT",
+  "dependencies": {
+    "lodash": "^4.17.11",
+    "prettier": "^1.14.2"
+  },
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-preset-flow": "^6.23.0",
+    "flow-bin": "^0.81.0",
+    "jest": "^24.7.1"
+  }
+}
