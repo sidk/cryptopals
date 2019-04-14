@@ -7,15 +7,18 @@ const decryptAES = (ciphertext: Buffer, key: string): Buffer => {
   // created from correctly encoded text
   // My mistake: treating the file read Buffer as ascii instead of base64
   const decipher = crypto.createDecipheriv("aes-128-ecb", key, "");
-  const decrypted = decipher.update(ciphertext);
+  // auto padding is set to false because sometimes ciphertext can be
+  // incorrecly padded, and we still want an output
+  decipher.setAutoPadding(false);
+  const decrypted: Buffer = decipher.update(ciphertext);
   return Buffer.concat([decrypted, decipher.final()]);
 };
 
 const encryptAES = (plaintext: Buffer, key: string): Buffer => {
   const cipher = crypto.createCipheriv("aes-128-ecb", key, "");
-  let encrypted = cipher.update(plaintext.toString(), "utf8", "hex");
-  encrypted += cipher.final("hex");
-  return Buffer.from(encrypted, "hex");
+  cipher.setAutoPadding(false);
+  const encrypted: Buffer = cipher.update(plaintext);
+  return Buffer.concat([encrypted, cipher.final()]);
 };
 
 module.exports = { decryptAES, encryptAES };

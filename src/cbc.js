@@ -39,11 +39,8 @@ const decryptBlock = (
   prevCipherBlock: Buffer,
   key: string
 ): Buffer => {
-  console.log("decrypting block", cipherBlock);
   const decryptedBlock = decryptAES(cipherBlock, key);
-  console.log("decrypted block", decryptedBlock);
   const ret = fixedXor(decryptedBlock, prevCipherBlock);
-  console.log(ret);
   return ret;
 };
 
