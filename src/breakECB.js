@@ -1,7 +1,6 @@
 // @flow
 
 const _ = require("lodash");
-const { isAes, generateRandomBytes } = require("./detect-aes-cbc");
 const pad = require("./pkcs7Pad");
 const { encryptAES } = require("./aes-ecb");
 
@@ -9,6 +8,8 @@ const keyLength = 16;
 
 const unknownString =
   "Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkgaGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBqdXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUgYnkK";
+
+type Oracle = (input: Buffer, key: string) => any;
 
 const oracle = (input: Buffer, key: string): Buffer => {
   const plaintextBuffer = Buffer.concat([
@@ -28,40 +29,54 @@ const oracle = (input: Buffer, key: string): Buffer => {
 const key = "YELLOW RUBMARINE";
 
 const maxBlockSize = 128;
-const getBlockSize = (oracleFn: function): ?number =>
+const getBlockSize = (oracleFn: Oracle): ?number =>
   Array.from({ length: maxBlockSize }, (_, i) => i).find(blockSize => {
     const myInput = Buffer.from(Array(blockSize * 2).fill("A"));
     const ciphertext = oracleFn(myInput, key);
     const chunks = _.chunk(ciphertext, blockSize).map(Buffer.from);
     const firstTwoChunks = chunks.slice(0, 2);
-    return !_.isEmpty(firstTwoChunks) &&
+    return (
+      !_.isEmpty(firstTwoChunks) &&
       _.difference(firstTwoChunks[1], firstTwoChunks[0]).length === 0
+    );
   });
 
-const dictionary = (oracleFn, knownBytes, blockSize) => Array.from({length: 256}, (_, i) => i).reduce((dictionary, i) => {
-    const myInput = Buffer.concat([knownBytes, Buffer.from([i])])
-    return { [ oracleFn(myInput, key).slice(0, blockSize) ]: i, ...dictionary}
-  }, {})
+const dictionary = (oracleFn: Oracle, knownBytes, blockSize) =>
+  Array.from({ length: 256 }, (_, i) => i).reduce((dictionary, i) => {
+    const myInput = Buffer.concat([knownBytes, Buffer.from([i])]);
+    return { [oracleFn(myInput, key).slice(0, blockSize)]: i, ...dictionary };
+  }, {});
 
-
-
-const breakOneCharacter = (oracleFn: function, blockSize: number, position: number = 0, suffix: Array<number> = [], block: number = 0) => {
+const breakOneCharacter = (
+  oracleFn: Oracle,
+  blockSize: number,
+  position: number = 0,
+  suffix: Array<number> = [],
+  block: number = 0
+) => {
   // position is indexed from the end of the block, so 0 means the last byte.
   // suffix is an array of "found" bytes. for every element in the suffix array,
   // position increases by 1
-  const identicalBytes = Buffer.from([...Array(blockSize - 1 - position)])
-  const knownBytes = block === 0 ? Buffer.concat([identicalBytes, Buffer.from(suffix)]) : Buffer.from(suffix)
-  const dict = dictionary(oracleFn, knownBytes, blockSize)
+  const identicalBytes = Buffer.from([...Array(blockSize - 1 - position)]);
+  const knownBytes =
+    block === 0
+      ? Buffer.concat([identicalBytes, Buffer.from(suffix)])
+      : Buffer.from(suffix);
+  const dict = dictionary(oracleFn, knownBytes, blockSize);
 
-  //slicing by blockSize is crucial here, because the entire ciphertext will be different this time due to pkcs7 padding being different (one less byte means one more to pad, which changes the plaintext of the last block)
+  // slicing by blockSize is crucial here, because the entire ciphertext will be different this time due to pkcs7 padding being different (one less byte means one more to pad, which changes the plaintext of the last block)
   // another thing i missed. the input to the oracle below should not include the suffix
-  const oracleOutput = oracleFn(identicalBytes, key).slice(block * blockSize, (block * blockSize) + blockSize)
-  return dict[oracleOutput]
-}
+  const oracleOutput = oracleFn(identicalBytes, key).slice(
+    block * blockSize,
+    block * blockSize + blockSize
+  );
+  return dict[oracleOutput];
+};
 
 const breakOneByteAtATime = () => {
-  const blockSize = getBlockSize(oracle);
-  const totalBlocks = 9; //this should be calculated
+  // TODO: Why is this so slow (14s on my old laptop)? How can it be made faster?
+  const blockSize = getBlockSize(oracle) || 16; // should throw error here.
+  const totalBlocks = 9; // this should be calculated
   const allBlocks = Array.from({ length: totalBlocks }, (_, i) => i).reduce(
     (blocks, block) => {
       blocks.push(
@@ -88,6 +103,12 @@ const breakOneByteAtATime = () => {
     },
     []
   );
-  console.log(allBlocks.map(block => Buffer.from(block).toString()).join(""));}
+  console.log(allBlocks.map(block => Buffer.from(block).toString()).join(""));
+};
 
-module.exports = { oracle, getBlockSize, breakOneCharacter };
+module.exports = {
+  oracle,
+  getBlockSize,
+  breakOneCharacter,
+  breakOneByteAtATime
+};
