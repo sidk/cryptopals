@@ -8,7 +8,7 @@ const key = "YELLOW SUBMARINE";
 const iv = Buffer.from(Array(16).fill(0));
 
 test("decryptCBC", () => {
-  //console.log(ciphertext.toString());
+  // console.log(ciphertext.toString());
   const result = decryptCBC(ciphertext, key, iv);
   console.log(result.toString());
 });
@@ -17,5 +17,5 @@ test("encryptCBC", () => {
   const plaintext = decryptCBC(ciphertext, key, iv);
   const testCiphertext = encryptCBC(plaintext, key, iv);
   const testPlaintext = decryptCBC(testCiphertext, key, iv);
-  //console.log(testPlaintext.toString());
+  // console.log(testPlaintext.toString());
 });

@@ -1,36 +1,23 @@
-const _ = require("lodash");
+import { oracleWithRandomPrefix, breakOneByteAtATime } from "./breakECB";
+import { isAes } from "./detect-aes-cbc";
 
-const { oracle, getBlockSize, breakOneCharacter } = require("./breakECB");
-const { isAes } = require("./detect-aes-cbc");
-
-test("stuff", () => {
-  const blockSize = getBlockSize(oracle);
-  const totalBlocks = 9; //this should be calculated
-  const allBlocks = Array.from({ length: totalBlocks }, (_, i) => i).reduce(
-    (blocks, block) => {
-      blocks.push(
-        Array.from({ length: blockSize }, (_, i) => i).reduce(
-          (plainBytes, position) => {
-            const previousBlock = block === 0 ? [] : blocks[block - 1];
-            const knownBytes = [
-              ...previousBlock.slice(position + 1),
-              ...plainBytes
-            ];
-            const plainByte = breakOneCharacter(
-              oracle,
-              blockSize,
-              position,
-              knownBytes,
-              block
-            );
-            return plainBytes.concat(plainByte);
-          },
-          []
-        )
-      );
-      return blocks;
-    },
-    []
+test("harder", () => {
+  // gonna assume blockSize is 16
+  //
+  // get random bytes length
+  const lengthAtWhichBlocksRepeat = Array.from(
+    { length: 256 },
+    (_, i) => i
+  ).find(i => isAes(oracleWithRandomPrefix(Buffer.from([...Array(i)]))));
+  const outputWithRepeatingBlocks = oracleWithRandomPrefix(
+    Buffer.from([...Array(lengthAtWhichBlocksRepeat)])
   );
-  console.log(allBlocks.map(block => Buffer.from(block).toString()).join(""));
+  const whereIdenticalBlocksStart = Array.from(
+    { length: 256 },
+    (_, i) => 256 - i + 1
+  ).find(i => isAes(outputWithRepeatingBlocks.slice(i)));
+  const randomBlocksLength = whereIdenticalBlocksStart;
+  const randomStringLength =
+    randomBlocksLength - (lengthAtWhichBlocksRepeat - 32);
+  breakOneByteAtATime(oracleWithRandomPrefix, randomStringLength);
 });

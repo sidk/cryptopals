@@ -1,6 +1,6 @@
 {
-    "extends": ["standard", "plugin:flowtype/recommended", "prettier", "prettier/standard"],
-    "plugins": ["prettier", "standard"],
+    "extends": ["standard", "plugin:flowtype/recommended", "prettier", "prettier/standard", "plugin:jest/recommended"],
+    "plugins": ["prettier", "standard", "jest"],
     "parserOptions": {
       "ecmaVersion": 2017
     },
