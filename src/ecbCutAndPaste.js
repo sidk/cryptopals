@@ -3,7 +3,7 @@ import queryString from "querystring";
 import encode from "querystring/encode";
 
 import { encryptAES, decryptAES } from "./aes-ecb";
-import pad from "./pkcs7Pad";
+import { oldPad as pad } from "./pkcs7Pad";
 
 const key = "YELLOW SUBMARINE";
 

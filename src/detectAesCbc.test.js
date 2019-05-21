@@ -1,5 +1,3 @@
-const _ = require("lodash");
-
 const { encryptionOracle, isAes } = require("./detect-aes-cbc");
 
 test("stuff", () => {

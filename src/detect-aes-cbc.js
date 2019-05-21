@@ -4,7 +4,7 @@ const _ = require("lodash");
 
 const { encryptCBC } = require("./cbc");
 const { encryptAES } = require("./aes-ecb");
-const pad = require("./pkcs7Pad");
+const { oldPad: pad } = require("./pkcs7Pad");
 
 const randomInteger = (max: number) =>
   Math.floor(Math.random() * Math.floor(max));
@@ -25,7 +25,7 @@ const encryptionOracle = (input: Buffer): Buffer => {
   const plaintextBuffer = Buffer.concat([prependBytes, input, appendBytes]);
   const blockSize =
     plaintextBuffer.length - (plaintextBuffer.length % keyLength) + 16;
-  const plaintext = Buffer.from(pad(plaintextBuffer.toString(), blockSize));
+  const plaintext = Buffer.from(pad(plaintextBuffer, blockSize));
   const useCbc = randomInteger(2);
   console.log("useCbc?", Boolean(useCbc));
   if (useCbc) {
@@ -37,7 +37,7 @@ const encryptionOracle = (input: Buffer): Buffer => {
 };
 
 const isAes = (ciphertext: Buffer): boolean => {
-  const chunks = _.chunk(ciphertext, 16);
+  const chunks = _.chunk(Array.from(ciphertext), 16);
   return chunks.some((chunk, i) => {
     if (_.difference(chunk, chunks[i + 1]).length === 0) {
       return true;

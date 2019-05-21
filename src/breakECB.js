@@ -1,7 +1,7 @@
 // @flow
 
 const _ = require("lodash");
-const pad = require("./pkcs7Pad");
+const { oldPad: pad } = require("./pkcs7Pad");
 const { encryptAES } = require("./aes-ecb");
 
 const keyLength = 16;
@@ -47,7 +47,7 @@ const getBlockSize = (oracleFn: Oracle): ?number =>
   Array.from({ length: maxBlockSize }, (_, i) => i).find(blockSize => {
     const myInput = Buffer.from(Array(blockSize * 2).fill("A"));
     const ciphertext = oracleFn(myInput, key);
-    const chunks = _.chunk(ciphertext, blockSize).map(Buffer.from);
+    const chunks = _.chunk(ciphertext, blockSize);
     const firstTwoChunks = chunks.slice(0, 2);
     return (
       !_.isEmpty(firstTwoChunks) &&
