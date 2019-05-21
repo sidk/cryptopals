@@ -16,7 +16,7 @@ const encryptBlock = (
 
 const encryptCBC = (plaintext: Buffer, key: string, iv: Buffer): Buffer => {
   const keySize = key.length;
-  const blocks = _.chunk(plaintext, keySize).map(Buffer.from);
+  const blocks = _.chunk(Array.from(plaintext), keySize).map(Buffer.from);
   return Buffer.concat(
     blocks.reduce(
       (
@@ -45,9 +45,9 @@ const decryptBlock = (
 };
 
 const decryptCBC = (ciphertext: Buffer, key: string, iv: Buffer): Buffer => {
-  //we should read files as ascii and then translate them into buffers
+  // we should read files as ascii and then translate them into buffers
   const keySize = key.length;
-  const blocks = _.chunk(ciphertext, keySize).map(Buffer.from);
+  const blocks = _.chunk(Array.from(ciphertext), keySize).map(Buffer.from);
   return Buffer.concat(
     blocks.map((block: Buffer, i: number) =>
       decryptBlock(block, blocks[i - 1] || iv, key)
