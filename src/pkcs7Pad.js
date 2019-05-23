@@ -22,6 +22,8 @@ const stripPadding = (buffer: Buffer) => {
 
   const lastByte = buffer[buffer.length - 1];
   if (
+    lastByte !== 0 &&
+    lastByte < buffer.length &&
     buffer
       .slice(buffer.length - lastByte, buffer.length)
       .every(byte => byte === lastByte)
