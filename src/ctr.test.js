@@ -7,8 +7,8 @@ test("ctr", () => {
   const cipherBuffer = Buffer.from(ciphertext, "base64");
   const plainBuffer = ctr(cipherBuffer, 0, "YELLOW SUBMARINE");
   const reCipher = ctr(plainBuffer, 0, "YELLOW SUBMARINE");
-  console.log(
-    cipherBuffer.toString("base64") === reCipher.toString("base64"),
-    plainBuffer.toString()
-  );
+  expect(
+    cipherBuffer.toString("base64") === reCipher.toString("base64")
+  ).toEqual(true);
+  console.log(plainBuffer.toString());
 });

@@ -58,7 +58,8 @@ module.exports = (base64Cipher: string): string => {
     })
   );
   const keys = transposedBlocks.map(block => {
-    return singleByteXor(Buffer.from(block).toString("hex")).key;
+    const sbx = singleByteXor(Buffer.from(block).toString("hex"));
+    return sbx.key;
   });
   return Buffer.from(keys).toString("ascii");
 };
