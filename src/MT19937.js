@@ -18,9 +18,6 @@ export const CONSTANTS = {
   w: bigInt(32) // word-size in bits
 };
 
-// let state; // state is an array of n values of w bits each
-// let index;
-
 export class MT19937 {
   constructor(seed) {
     // seed is a w-bit/32-bit value
