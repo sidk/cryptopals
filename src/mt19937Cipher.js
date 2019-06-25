@@ -10,9 +10,7 @@ export const stream = (buffer, seed) => {
     blocks.map((block, i) => {
       const nonceBuffer = Buffer.alloc(4, 0);
       const rn = rng.extract();
-      // console.log(rn, BigInt(rn), Buffer.from(block));
       nonceBuffer.writeUInt32LE(Number(rn), 0);
-      // console.log(nonceBuffer);
       const outputBuffer = xor(Buffer.from(block), nonceBuffer);
       return outputBuffer;
     })

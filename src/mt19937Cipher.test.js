@@ -10,7 +10,7 @@ test("encrypt and decrypt", () => {
 
 test("seed recovery", () => {
   const plainBuffer = Buffer.from("something very secret");
-  // if i do with bigger (close to 16-bit numbers), big-integer's performance
+  // if i do this with bigger (close to 16-bit numbers), big-integer's performance
   // limitations in the RNG start getting in the way. If you have to do this again, look at more
   // performant options to handle big integers
   const cipherBuffer = stream(plainBuffer, bigInt(1000));

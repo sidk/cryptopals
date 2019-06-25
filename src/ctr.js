@@ -15,3 +15,9 @@ export const ctr = (buffer, nonce, key) => {
     })
   );
 };
+
+export const edit = (cipherBuffer, offset, newPlaintext, nonce, key) => {
+  const decryptedBuffer = ctr(cipherBuffer, nonce, key);
+  decryptedBuffer.write(newPlaintext, offset);
+  return ctr(decryptedBuffer, nonce, key);
+};
