@@ -1,7 +1,6 @@
 const { decryptAES } = require("./aes-ecb");
 const { ctr, edit } = require("./ctr");
 const fs = require("fs");
-const { chunk } = require("lodash");
 const xor = require("./fixedXor");
 
 test("break random access read/write AES CTR", () => {
