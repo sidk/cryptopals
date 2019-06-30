@@ -2,12 +2,11 @@ const { MAC, sha1Pad } = require("./SHA1MAC");
 const sha1 = require("./sha1");
 
 test("length extension attack", () => {
-  // const messageOriginal = "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon";
+  const message =
+    "comment1=cooking%20MCs;userdata=foo;comment2=%20like%20a%20pound%20of%20bacon";
 
   const key = "secret";
-  const message = "data";
-
-  const append = "append";
+  const append = ";admin=true;";
 
   const messageWithPadding = sha1Pad(key + message, true);
   const slicedMessage = messageWithPadding.slice(key.length);
@@ -25,11 +24,11 @@ test("length extension attack", () => {
     state[2],
     state[3],
     state[4],
-    16
+    messageWithPadding.length / 4
   );
 
-  // i'm constructing forgedMac without knowledge of the key, only its length.
-  // the length should be guessed.
+  // i'm constructing forgedMac only with knowledge of the key's length.
+  // the length ought to be guessed, but i'm assuming i already know it.
   expect(sha1(Buffer.concat([Buffer.from(key), finalMessage])).hex).toEqual(
     forgedMac
   );
